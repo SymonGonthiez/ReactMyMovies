@@ -2,15 +2,11 @@ import React from "react";
 import VideoListItem from "../components/video-list-item";
 
 const VideoList = ({ movieList }) => {
-  console.log("------");
-  console.log("", movieList);
-  console.log("------");
-  const movies = ["movie1", "movie2", "movie3", "movie4", "movie5"];
   return (
     <div>
       <ul>
-        {movies.map((movie) => {
-          return <VideoListItem key={movie} movie={movie} />;
+        {movieList.map((movie) => {
+          return <VideoListItem key={movie.id} movie={movie} />; // Movie objet renvoyé par moviedb
         })}
       </ul>
     </div>

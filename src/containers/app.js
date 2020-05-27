@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import SearchBar from "../components/search-bar";
 import VideoList from "./video-list";
 import VideoDetail from "../components/video-detail";
+import Video from "../components/video";
 import axios from "axios";
 
 const API_END_POINT = "https://api.themoviedb.org/3/";
@@ -41,15 +42,17 @@ class App extends Component {
       )
       .then(
         function (response) {
-          if (typeof response.data.videos === true) {
+          try {
             console.log(response.data);
             const youtubeKey = response.data.videos.results[0].key;
 
             let newCurrentMovieState = this.state.currentMovie;
             newCurrentMovieState.videoId = youtubeKey;
             this.setState({ currentMovie: newCurrentMovieState });
-          } else {
-            console.log("No video");
+          } catch (error) {
+            if (typeof response.data.videos !== true) {
+              console.log("No video");
+            }
           }
         }.bind(this)
       );
@@ -67,11 +70,16 @@ class App extends Component {
     return (
       <div>
         <SearchBar />
-        {renderVideoList()}
-        <VideoDetail
-          title={this.state.currentMovie.title}
-          description={this.state.currentMovie.overview}
-        />
+        <div className="row">
+          <div className="col-md-8">
+            <Video videoId={this.state.currentMovie.videoId} />
+            <VideoDetail
+              title={this.state.currentMovie.title}
+              description={this.state.currentMovie.overview}
+            />
+          </div>
+          <div className="col-md-4">{renderVideoList()}</div>
+        </div>
       </div>
     );
   }

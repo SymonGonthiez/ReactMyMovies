@@ -9,7 +9,7 @@ const API_END_POINT = "https://api.themoviedb.org/3/";
 const API_KEY = "api_key=76a51bc291fdc20d6ca86a1e0a141152";
 const DEFAULT_TYPE_SEARCH = "discover";
 const DEFAULT_PARAM = "language=fr&include_adult=false";
-
+const SEARCH_URL = "search/movie?language=fr_FR&include_adult=false";
 const POPULAR_MOVIES_URL =
   "discover/movie?language=fr&sort_by=popularity.desc&include_adult=false&append_to_response=images";
 
@@ -35,6 +35,10 @@ class App extends Component {
     );
   }
 
+  componentWillMount() {
+    this.initMovies();
+  }
+
   applyVideoToCurrentMovie() {
     axios
       .get(
@@ -58,21 +62,53 @@ class App extends Component {
       );
   }
 
-  componentWillMount() {
-    this.initMovies();
+  onClickListItem(movie) {
+    this.setState({ currentMovie: movie }, function () {
+      this.applyVideoToCurrentMovie();
+    });
   }
+
+  onClickSearch(searchText) {
+    if (searchText) {
+      axios
+        .get(`${API_END_POINT}${SEARCH_URL}&${API_KEY}&query=${searchText}`)
+        .then(
+          function (response) {
+            if (response.data && response.data.results[0]) {
+              if (response.data.results[0].id != this.state.currentMovie.id) {
+                this.setState(
+                  { currentMovie: response.data.results[0] },
+                  () => {
+                    this.applyVideoToCurrentMovie();
+                  }
+                );
+              }
+            }
+          }.bind(this)
+        );
+    }
+  }
+
   render() {
     const renderVideoList = () => {
       if (this.state.movieList.length >= 5) {
-        return <VideoList movieList={this.state.movieList} />;
+        return (
+          <VideoList
+            movieList={this.state.movieList}
+            callback={this.onClickListItem.bind(this)}
+          />
+        );
       }
     };
     return (
       <div>
-        <SearchBar />
+        <div className="search_bar">
+          <SearchBar callback={this.onClickSearch.bind(this)} />
+        </div>
         <div className="row">
           <div className="col-md-8">
             <Video videoId={this.state.currentMovie.videoId} />
+
             <VideoDetail
               title={this.state.currentMovie.title}
               description={this.state.currentMovie.overview}
